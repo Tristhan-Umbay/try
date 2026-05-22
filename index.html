@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <link rel="icon" type="image/x-icon" href="snake.png">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -14,12 +13,17 @@
             --safe-margin-tb: 18px;
             --game-size: 300px;
             --dpad-btn: 60px;
+            --neon: #4ecca3;
+            --neon2: #e94560;
+            --bg: #1a1a2e;
+            --panel: #16213e;
+            --deep: #0f3460;
         }
 
         html, body { width: 100%; height: 100%; }
 
         body {
-            background: #1a1a2e;
+            background: var(--bg);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -33,6 +37,274 @@
             gap: 0;
         }
 
+        /* ── HOME DASHBOARD ───────────────────────── */
+        #homeDashboard {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            gap: 0;
+            overflow-y: auto;
+        }
+
+        #homeDashboard.hidden { display: none !important; }
+
+        .dash-logo {
+            font-size: clamp(22px, 6vw, 38px);
+            font-weight: bold;
+            letter-spacing: 6px;
+            color: var(--neon);
+            text-shadow: 0 0 20px rgba(78,204,163,0.5);
+            margin-bottom: 4px;
+        }
+
+        .dash-tagline {
+            font-size: clamp(8px, 1.8vw, 11px);
+            color: #555;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        /* Stats row */
+        .dash-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--panel);
+            border: 1px solid #1e3a5f;
+            border-radius: 10px;
+            padding: 10px 8px;
+            text-align: center;
+        }
+
+        .stat-card .stat-label {
+            font-size: clamp(7px, 1.4vw, 9px);
+            color: #556;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .stat-val {
+            font-size: clamp(16px, 4vw, 24px);
+            font-weight: bold;
+            color: var(--neon);
+        }
+
+        .stat-card .stat-val.red { color: var(--neon2); }
+        .stat-card .stat-val.gold { color: #ffd700; }
+
+        /* Difficulty selector */
+        .dash-section-label {
+            font-size: clamp(7px, 1.4vw, 9px);
+            color: #556;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            width: 100%;
+            max-width: 380px;
+            text-align: left;
+        }
+
+        .dash-diff-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            max-width: 380px;
+            margin-bottom: 16px;
+        }
+
+        .dash-diff-btn {
+            background: var(--panel);
+            border: 2px solid #1e3a5f;
+            border-radius: 10px;
+            color: #aaa;
+            font-family: inherit;
+            font-size: clamp(9px, 2vw, 12px);
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 10px 6px;
+            cursor: pointer;
+            transition: all 0.18s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .dash-diff-btn .diff-speed {
+            font-size: clamp(7px, 1.2vw, 9px);
+            font-weight: normal;
+            color: #445;
+            letter-spacing: 0;
+        }
+
+        .dash-diff-btn:hover {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+
+        .dash-diff-btn.active {
+            border-color: var(--neon);
+            color: var(--bg);
+            background: var(--neon);
+        }
+
+        .dash-diff-btn.active .diff-speed { color: #0f4030; }
+
+        /* Play button */
+        .dash-play-btn {
+            width: 100%;
+            max-width: 380px;
+            padding: 14px 0;
+            background: var(--neon2);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: clamp(13px, 3vw, 17px);
+            font-weight: bold;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .dash-play-btn:hover { background: #ff6b6b; transform: scale(1.02); }
+        .dash-play-btn:active { transform: scale(0.97); }
+
+        /* Controls hint */
+        .dash-controls {
+            display: flex;
+            gap: 16px;
+            color: #445;
+            font-size: clamp(7px, 1.3vw, 9px);
+            letter-spacing: 1px;
+        }
+
+        /* ── GAME OVER SCREEN ─────────────────────── */
+        #gameOverScreen {
+            position: fixed;
+            inset: 0;
+            background: rgba(10,10,20,0.96);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 20px;
+        }
+
+        #gameOverScreen.hidden { display: none !important; }
+
+        .go-title {
+            font-size: clamp(24px, 7vw, 42px);
+            color: var(--neon2);
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-shadow: 0 0 24px rgba(233,69,96,0.6);
+            margin-bottom: 6px;
+        }
+
+        .go-score-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .go-stat {
+            text-align: center;
+        }
+
+        .go-stat .go-label {
+            font-size: clamp(7px, 1.4vw, 10px);
+            color: #556;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .go-stat .go-val {
+            font-size: clamp(20px, 5vw, 32px);
+            font-weight: bold;
+            color: var(--neon);
+        }
+
+        .go-stat .go-val.gold { color: #ffd700; }
+
+        .go-new-best {
+            font-size: clamp(8px, 1.8vw, 11px);
+            color: #ffd700;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .go-new-best.show { opacity: 1; }
+
+        .go-diff-badge {
+            font-size: clamp(7px, 1.4vw, 10px);
+            color: var(--bg);
+            background: var(--neon);
+            border-radius: 6px;
+            padding: 2px 10px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .go-actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .go-btn {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: clamp(10px, 2.2vw, 13px);
+            letter-spacing: 2px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s, background 0.18s;
+        }
+
+        .go-btn:active { transform: scale(0.95); }
+
+        .go-btn.play-again {
+            background: var(--neon2);
+            color: #fff;
+            border-color: var(--neon2);
+        }
+
+        .go-btn.play-again:hover { background: #ff6b6b; }
+
+        .go-btn.go-home {
+            background: transparent;
+            color: #aaa;
+            border-color: #2a3a5a;
+        }
+
+        .go-btn.go-home:hover { background: var(--panel); color: #eee; }
+
         /* ── UI Panel ─────────────────────────────── */
         .ui-panel {
             display: flex;
@@ -44,39 +316,22 @@
         }
 
         .score-box {
-            background: #16213e;
+            background: var(--panel);
             padding: 4px 10px;
             border-radius: 8px;
-            border: 2px solid #e94560;
+            border: 2px solid var(--neon2);
             font-size: clamp(9px, 2vw, 14px);
             font-weight: bold;
             white-space: nowrap;
         }
 
-        .score-box span { color: #e94560; }
+        .score-box span { color: var(--neon2); }
 
-        .btn {
-            background: #e94560;
-            color: white;
-            border: none;
-            padding: 5px 14px;
-            font-size: clamp(9px, 1.8vw, 13px);
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            transition: transform 0.1s, background 0.2s;
-            white-space: nowrap;
-        }
-
-        .btn:hover { background: #ff6b6b; transform: scale(1.05); }
-        .btn:active { transform: scale(0.95); }
-
-        /* ── Menu Button ──────────────────────────── */
+        /* Menu Button */
         .menu-btn {
-            background: #16213e;
-            color: #4ecca3;
-            border: 2px solid #4ecca3;
+            background: var(--panel);
+            color: var(--neon);
+            border: 2px solid var(--neon);
             padding: 5px 14px;
             font-size: clamp(9px, 1.8vw, 13px);
             border-radius: 8px;
@@ -90,30 +345,18 @@
             gap: 5px;
         }
 
-        .menu-btn:hover { background: #4ecca3; color: #1a1a2e; transform: scale(1.05); }
+        .menu-btn:hover { background: var(--neon); color: var(--bg); transform: scale(1.05); }
         .menu-btn:active { transform: scale(0.95); }
 
-        .menu-btn .hamburger {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
+        .menu-btn .hamburger { display: flex; flex-direction: column; gap: 3px; }
+        .menu-btn .hamburger span { display: block; width: 14px; height: 2px; background: currentColor; border-radius: 2px; }
 
-        .menu-btn .hamburger span {
-            display: block;
-            width: 14px;
-            height: 2px;
-            background: currentColor;
-            border-radius: 2px;
-            transition: background 0.2s;
-        }
-
-        /* ── Game Container ───────────────────────── */
+        /* Game container */
         .game-container {
             position: relative;
-            border: 3px solid #16213e;
+            border: 3px solid var(--panel);
             border-radius: 8px;
-            background: #0f3460;
+            background: var(--deep);
             padding: 5px;
             flex-shrink: 0;
             width: var(--game-size);
@@ -122,172 +365,13 @@
 
         #gameCanvas {
             display: block;
-            background: #1a1a2e;
+            background: var(--bg);
             border-radius: 4px;
             width: 100%;
             height: 100%;
         }
 
-        /* ── Overlay (start/game-over screen) ──────── */
-        .overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.87);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            z-index: 10;
-            gap: 6px;
-            padding: 12px;
-        }
-
-        .overlay h2 {
-            color: #e94560;
-            font-size: clamp(14px, 4.5vw, 28px);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .overlay p {
-            color: #aaa;
-            font-size: clamp(8px, 1.8vw, 13px);
-            text-align: center;
-        }
-
-        .diff-label {
-            color: #888;
-            font-size: clamp(7px, 1.4vw, 10px);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .difficulty-selector {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .diff-btn {
-            padding: 3px 10px;
-            border: 2px solid #4ecca3;
-            background: transparent;
-            color: #4ecca3;
-            font-family: inherit;
-            font-size: clamp(7px, 1.6vw, 11px);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: bold;
-        }
-
-        .diff-btn:hover { background: #4ecca3; color: #1a1a2e; }
-        .diff-btn.active {
-            background: #4ecca3;
-            color: #1a1a2e;
-            box-shadow: 0 0 10px rgba(78,204,163,0.4);
-        }
-
-        .high-score {
-            color: #ffd700;
-            font-size: clamp(7px, 1.6vw, 11px);
-        }
-
-        /* ── Menu Popup ───────────────────────────── */
-        .menu-popup-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.15s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.85); opacity: 0; }
-            to   { transform: scale(1);    opacity: 1; }
-        }
-
-        .menu-popup {
-            background: #0f3460;
-            border: 2px solid #4ecca3;
-            border-radius: 14px;
-            padding: 24px 32px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 14px;
-            min-width: 200px;
-            box-shadow: 0 0 40px rgba(78,204,163,0.25), 0 8px 32px rgba(0,0,0,0.6);
-            animation: popIn 0.18s cubic-bezier(.34,1.56,.64,1);
-        }
-
-        .menu-popup h3 {
-            color: #4ecca3;
-            font-size: clamp(14px, 3.5vw, 20px);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            border-bottom: 1px solid #4ecca333;
-            width: 100%;
-            text-align: center;
-            padding-bottom: 10px;
-        }
-
-        .menu-popup-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .popup-btn {
-            width: 100%;
-            padding: 10px 0;
-            border-radius: 8px;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: clamp(11px, 2.5vw, 15px);
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: transform 0.1s, background 0.2s, color 0.2s;
-            letter-spacing: 1px;
-        }
-
-        .popup-btn:active { transform: scale(0.95); }
-
-        .popup-btn.resume {
-            background: #4ecca3;
-            color: #1a1a2e;
-            border-color: #4ecca3;
-        }
-
-        .popup-btn.resume:hover { background: #6eefc0; }
-
-        .popup-btn.restart {
-            background: transparent;
-            color: #e94560;
-            border-color: #e94560;
-        }
-
-        .popup-btn.restart:hover { background: #e94560; color: #fff; }
-
-        .popup-btn.home {
-            background: transparent;
-            color: #aaa;
-            border-color: #444;
-        }
-
-        .popup-btn.home:hover { background: #16213e; color: #eee; border-color: #888; }
-
-        /* ── Desktop keyboard hint ──────────────────── */
+        /* Controls info */
         .controls-info {
             color: #666;
             font-size: clamp(9px, 1.4vw, 12px);
@@ -296,7 +380,7 @@
             margin-top: 4px;
         }
 
-        /* ── D-pad ────────────────────────────────── */
+        /* D-pad */
         .mobile-controls {
             display: none;
             flex-direction: column;
@@ -322,22 +406,16 @@
             .controls-info   { display: block !important; }
         }
 
-        .d-pad-row {
-            display: flex;
-            align-items: center;
-        }
+        .d-pad-row { display: flex; align-items: center; }
 
-        .d-pad-spacer {
-            width: var(--dpad-btn);
-            height: var(--dpad-btn);
-        }
+        .d-pad-spacer { width: var(--dpad-btn); height: var(--dpad-btn); }
 
         .d-pad-btn {
             width: var(--dpad-btn);
             height: var(--dpad-btn);
-            background: #16213e;
-            border: 2px solid #4ecca3;
-            color: #4ecca3;
+            background: var(--panel);
+            border: 2px solid var(--neon);
+            color: var(--neon);
             border-radius: 12px;
             cursor: pointer;
             display: flex;
@@ -349,13 +427,6 @@
             margin: 3px;
         }
 
-        .d-pad-btn.pause-btn {
-            border-color: #e94560;
-            color: #e94560;
-            font-size: clamp(14px, 4vw, 20px);
-            font-family: inherit;
-        }
-
         .d-pad-btn svg {
             width: 55%; height: 55%;
             stroke: currentColor; fill: none;
@@ -364,108 +435,218 @@
         }
 
         .d-pad-btn:active, .d-pad-btn.pressed {
-            background: #4ecca3; color: #1a1a2e; transform: scale(0.9);
+            background: var(--neon); color: var(--bg); transform: scale(0.9);
         }
 
-        .d-pad-btn.pause-btn:active { background: #e94560; color: #fff; }
+        /* Menu Popup */
+        .menu-popup-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.15s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn  { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .menu-popup {
+            background: var(--deep);
+            border: 2px solid var(--neon);
+            border-radius: 14px;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            min-width: 200px;
+            box-shadow: 0 0 40px rgba(78,204,163,0.2);
+            animation: popIn 0.18s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        .menu-popup h3 {
+            color: var(--neon);
+            font-size: clamp(14px, 3.5vw, 20px);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #1e3a5f;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 10px;
+        }
+
+        .menu-popup-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+
+        .popup-btn {
+            width: 100%;
+            padding: 10px 0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: clamp(11px, 2.5vw, 15px);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s, background 0.2s, color 0.2s;
+            letter-spacing: 1px;
+        }
+
+        .popup-btn:active { transform: scale(0.95); }
+        .popup-btn.resume  { background: var(--neon); color: var(--bg); border-color: var(--neon); }
+        .popup-btn.resume:hover { background: #6eefc0; }
+        .popup-btn.restart { background: transparent; color: var(--neon2); border-color: var(--neon2); }
+        .popup-btn.restart:hover { background: var(--neon2); color: #fff; }
+        .popup-btn.home    { background: transparent; color: #aaa; border-color: #2a3a5a; }
+        .popup-btn.home:hover { background: var(--panel); color: #eee; border-color: #888; }
 
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- Score row -->
-    <div class="ui-panel">
-        <div class="score-box">SCORE: <span id="score">0</span></div>
-        <!-- MENU button (replaces START) -->
-        <button class="menu-btn" id="menuTopBtn" onclick="openMenu()">
-            <span class="hamburger">
-                <span></span><span></span><span></span>
-            </span>
-            MENU
+<!-- ══ HOME DASHBOARD ══════════════════════════════════════════ -->
+<div id="homeDashboard">
+    <div class="dash-logo">SNAKE</div>
+    <div class="dash-tagline">arcade edition</div>
+
+    <!-- Stats -->
+    <div class="dash-stats">
+        <div class="stat-card">
+            <div class="stat-label">Best Score</div>
+            <div class="stat-val gold" id="dashHighScore">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Games</div>
+            <div class="stat-val" id="dashGames">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Last Score</div>
+            <div class="stat-val red" id="dashLastScore">—</div>
+        </div>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="dash-section-label">Select Difficulty</div>
+    <div class="dash-diff-grid">
+        <button class="dash-diff-btn active" onclick="dashSetDiff('easy')"    id="ddEasy">
+            EASY<span class="diff-speed">Relaxed pace</span>
         </button>
-        <div class="score-box">HIGH: <span id="highScore">0</span></div>
+        <button class="dash-diff-btn"        onclick="dashSetDiff('medium')"  id="ddMedium">
+            MEDIUM<span class="diff-speed">Standard</span>
+        </button>
+        <button class="dash-diff-btn"        onclick="dashSetDiff('hard')"    id="ddHard">
+            HARD<span class="diff-speed">Fast</span>
+        </button>
+        <button class="dash-diff-btn"        onclick="dashSetDiff('veryhard')" id="ddVeryhard">
+            VERY HARD<span class="diff-speed">Insane</span>
+        </button>
     </div>
 
-    <!-- Canvas -->
-    <div class="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <!-- Start / Game-Over overlay -->
-        <div class="overlay" id="overlay">
-            <h2>SNAKE GAME</h2>
-            <div class="diff-label">Select Difficulty</div>
-            <div class="difficulty-selector">
-                <button class="diff-btn active" onclick="setDifficulty('easy')">EASY</button>
-                <button class="diff-btn" onclick="setDifficulty('medium')">MEDIUM</button>
-                <button class="diff-btn" onclick="setDifficulty('hard')">HARD</button>
-                <button class="diff-btn" onclick="setDifficulty('veryhard')">VERY HARD</button>
-            </div>
-            <p>Arrow Keys / WASD or D-pad</p>
-            <button class="btn" onclick="startGame()">PLAY</button>
-            <div class="high-score" id="overlayHighScore"></div>
+    <!-- Play -->
+    <button class="dash-play-btn" onclick="startGameFromDash()">▶ &nbsp;PLAY</button>
+
+    <!-- Controls hint -->
+    <div class="dash-controls">
+        <span>↑↓←→ WASD</span>
+        <span>SPACE pause</span>
+        <span>M menu</span>
+    </div>
+</div>
+
+<!-- ══ GAME OVER SCREEN ════════════════════════════════════════ -->
+<div id="gameOverScreen" class="hidden">
+    <div class="go-title">GAME OVER</div>
+    <div class="go-score-row">
+        <div class="go-stat">
+            <div class="go-label">Score</div>
+            <div class="go-val" id="goScore">0</div>
+        </div>
+        <div class="go-stat">
+            <div class="go-label">Best</div>
+            <div class="go-val gold" id="goBest">0</div>
         </div>
     </div>
+    <div class="go-new-best" id="goNewBest">★ NEW BEST ★</div>
+    <div class="go-diff-badge" id="goDiffBadge">EASY</div>
+    <div class="go-actions">
+        <button class="go-btn play-again" onclick="startGameFromDash()">↺ RETRY</button>
+        <button class="go-btn go-home"    onclick="showHome()">⌂ HOME</button>
+    </div>
+</div>
 
-    <!-- Desktop hint -->
-    <div class="controls-info">Arrow Keys or WASD &bull; Space to pause &bull; M for menu</div>
+<!-- ══ GAME UI ═════════════════════════════════════════════════ -->
+<div class="ui-panel">
+    <div class="score-box">SCORE: <span id="score">0</span></div>
+    <button class="menu-btn" id="menuTopBtn" onclick="openMenu()">
+        <span class="hamburger"><span></span><span></span><span></span></span>
+        MENU
+    </button>
+    <div class="score-box">HIGH: <span id="highScore">0</span></div>
+</div>
 
-    <!-- D-pad -->
-    <div class="mobile-controls" id="dpad">
-        <div class="d-pad-row">
-            <div class="d-pad-spacer"></div>
-            <button class="d-pad-btn" id="btn-up" aria-label="Up"
-                ontouchstart="dpadPress(event,'up')" ontouchend="dpadRelease('up')"
-                onmousedown="dpadPress(event,'up')" onmouseup="dpadRelease('up')">
-                <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-            </button>
-            <div class="d-pad-spacer"></div>
-        </div>
-        <div class="d-pad-row">
-            <button class="d-pad-btn" id="btn-left" aria-label="Left"
-                ontouchstart="dpadPress(event,'left')" ontouchend="dpadRelease('left')"
-                onmousedown="dpadPress(event,'left')" onmouseup="dpadRelease('left')">
-                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <!-- Centre D-pad: blank spacer -->
-            <div class="d-pad-spacer"></div>
-            <button class="d-pad-btn" id="btn-right" aria-label="Right"
-                ontouchstart="dpadPress(event,'right')" ontouchend="dpadRelease('right')"
-                onmousedown="dpadPress(event,'right')" onmouseup="dpadRelease('right')">
-                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-        </div>
-        <div class="d-pad-row">
-            <div class="d-pad-spacer"></div>
-            <button class="d-pad-btn" id="btn-down" aria-label="Down"
-                ontouchstart="dpadPress(event,'down')" ontouchend="dpadRelease('down')"
-                onmousedown="dpadPress(event,'down')" onmouseup="dpadRelease('down')">
-                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="d-pad-spacer"></div>
+<div class="game-container">
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<div class="controls-info">Arrow Keys or WASD &bull; Space to pause &bull; M for menu</div>
+
+<div class="mobile-controls" id="dpad">
+    <div class="d-pad-row">
+        <div class="d-pad-spacer"></div>
+        <button class="d-pad-btn" id="btn-up" aria-label="Up"
+            ontouchstart="dpadPress(event,'up')" ontouchend="dpadRelease('up')"
+            onmousedown="dpadPress(event,'up')" onmouseup="dpadRelease('up')">
+            <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <div class="d-pad-spacer"></div>
+    </div>
+    <div class="d-pad-row">
+        <button class="d-pad-btn" id="btn-left" aria-label="Left"
+            ontouchstart="dpadPress(event,'left')" ontouchend="dpadRelease('left')"
+            onmousedown="dpadPress(event,'left')" onmouseup="dpadRelease('left')">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="d-pad-spacer"></div>
+        <button class="d-pad-btn" id="btn-right" aria-label="Right"
+            ontouchstart="dpadPress(event,'right')" ontouchend="dpadRelease('right')"
+            onmousedown="dpadPress(event,'right')" onmouseup="dpadRelease('right')">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+    </div>
+    <div class="d-pad-row">
+        <div class="d-pad-spacer"></div>
+        <button class="d-pad-btn" id="btn-down" aria-label="Down"
+            ontouchstart="dpadPress(event,'down')" ontouchend="dpadRelease('down')"
+            onmousedown="dpadPress(event,'down')" onmouseup="dpadRelease('down')">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="d-pad-spacer"></div>
+    </div>
+</div>
+
+<!-- Menu Popup -->
+<div class="menu-popup-backdrop hidden" id="menuBackdrop">
+    <div class="menu-popup">
+        <h3>⚙ Menu</h3>
+        <div class="menu-popup-actions">
+            <button class="popup-btn resume"  onclick="menuResume()">▶ Resume</button>
+            <button class="popup-btn restart" onclick="menuRestart()">↺ Restart</button>
+            <button class="popup-btn home"    onclick="menuHome()">⌂ Home</button>
         </div>
     </div>
-
-    <!-- Menu Popup -->
-    <div class="menu-popup-backdrop hidden" id="menuBackdrop">
-        <div class="menu-popup">
-            <h3>⚙ Menu</h3>
-            <div class="menu-popup-actions">
-                <button class="popup-btn resume"  onclick="menuResume()">▶ Resume</button>
-                <button class="popup-btn restart" onclick="menuRestart()">↺ Restart</button>
-                <button class="popup-btn home"    onclick="menuHome()">⌂ Home</button>
-            </div>
-        </div>
-    </div>
+</div>
 
 <script>
     const canvas   = document.getElementById('gameCanvas');
     const ctx      = canvas.getContext('2d');
-    const overlay  = document.getElementById('overlay');
     const scoreEl  = document.getElementById('score');
-    const highScoreEl      = document.getElementById('highScore');
-    const overlayHighScore = document.getElementById('overlayHighScore');
+    const highScoreEl = document.getElementById('highScore');
     const dpadEl   = document.getElementById('dpad');
     const menuBackdrop = document.getElementById('menuBackdrop');
+    const homeDash = document.getElementById('homeDashboard');
+    const gameOverScreen = document.getElementById('gameOverScreen');
 
     const TILE_COUNT = 24;
     let GRID_SIZE = 12;
@@ -480,9 +661,11 @@
     let currentDifficulty = 'easy';
     let gameSpeed = 150;
     let snake=[], food={}, direction={x:0,y:0}, nextDirection={x:0,y:0};
-    let score=0, highScore=+(localStorage.getItem('snakeHighScore')||0);
-    let gameLoop=null, isRunning=false, isPaused=false, particles=[];
-    let menuOpen = false;
+    let score=0;
+    let highScore    = +(localStorage.getItem('snakeHighScore') || 0);
+    let totalGames   = +(localStorage.getItem('snakeTotalGames') || 0);
+    let lastScore    = localStorage.getItem('snakeLastScore');
+    let gameLoop=null, isRunning=false, isPaused=false, particles=[], menuOpen=false;
 
     const C = {
         bg:'#1a1a2e', grid:'#16213e',
@@ -490,7 +673,35 @@
         food:'#e94560', foodGlow:'#ff6b6b'
     };
 
-    highScoreEl.textContent = highScore;
+    // Init dashboard display
+    refreshDash();
+
+    /* ── Dashboard helpers ───────────────────────────────────── */
+    function refreshDash() {
+        document.getElementById('dashHighScore').textContent = highScore;
+        document.getElementById('dashGames').textContent     = totalGames;
+        document.getElementById('dashLastScore').textContent = lastScore !== null ? lastScore : '—';
+        highScoreEl.textContent = highScore;
+    }
+
+    function dashSetDiff(diff) {
+        currentDifficulty = diff;
+        gameSpeed = DIFFICULTIES[diff].speed;
+        document.querySelectorAll('.dash-diff-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('dd' + diff.charAt(0).toUpperCase() + diff.slice(1)).classList.add('active');
+    }
+
+    function showHome() {
+        gameOverScreen.classList.add('hidden');
+        homeDash.classList.remove('hidden');
+        refreshDash();
+    }
+
+    function startGameFromDash() {
+        homeDash.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        startGame();
+    }
 
     /* ── Responsive sizing ───────────────────────────────────── */
     function isDpadVisible() {
@@ -498,47 +709,31 @@
     }
 
     function resize() {
-        const margin   = 10;
-        const marginTB = 18;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const uiH     = 42;
-        const hintH   = isDpadVisible() ? 0 : 24;
-        const dpadVisible = isDpadVisible();
-        const dpadEstimate = dpadVisible ? 210 : 0;
-        const gap = 20;
-        const availH = vh - marginTB * 2 - uiH - hintH - dpadEstimate - gap;
-        const availW = vw - margin * 2;
+        const margin = 10, marginTB = 18;
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const uiH = 42, hintH = isDpadVisible() ? 0 : 24;
+        const dpadEstimate = isDpadVisible() ? 210 : 0;
+        const availH = vh - marginTB*2 - uiH - hintH - dpadEstimate - 20;
+        const availW = vw - margin*2;
         const raw  = Math.min(availW, availH);
         const size = Math.max(96, Math.floor(raw / TILE_COUNT) * TILE_COUNT);
         GRID_SIZE  = size / TILE_COUNT;
         document.documentElement.style.setProperty('--game-size', size + 'px');
-        canvas.width  = size;
-        canvas.height = size;
-        const btnRaw  = Math.floor((size - margin * 2) / 3);
-        const btnSize = Math.min(Math.max(btnRaw, 44), 80);
+        canvas.width = size; canvas.height = size;
+        const btnSize = Math.min(Math.max(Math.floor((size - margin*2) / 3), 44), 80);
         document.documentElement.style.setProperty('--dpad-btn', btnSize + 'px');
         draw();
     }
 
-    window.addEventListener('resize', () => { resize(); });
+    window.addEventListener('resize', resize);
     requestAnimationFrame(() => requestAnimationFrame(resize));
-
-    /* ── Difficulty ──────────────────────────────────────────── */
-    function setDifficulty(diff) {
-        currentDifficulty = diff;
-        gameSpeed = DIFFICULTIES[diff].speed;
-        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector(`[onclick="setDifficulty('${diff}')"]`).classList.add('active');
-    }
 
     /* ── Game logic ──────────────────────────────────────────── */
     function initGame() {
         const s = Math.floor(TILE_COUNT / 2);
         snake = [{x:s,y:s},{x:s-1,y:s},{x:s-2,y:s}];
         direction = {x:1,y:0}; nextDirection = {x:1,y:0};
-        score = 0; scoreEl.textContent = 0;
-        particles = [];
+        score = 0; scoreEl.textContent = 0; particles = [];
         spawnFood();
     }
 
@@ -570,21 +765,16 @@
     function draw() {
         ctx.fillStyle = C.bg;
         ctx.fillRect(0,0,canvas.width,canvas.height);
-
         ctx.strokeStyle = C.grid; ctx.lineWidth = 0.5;
         for (let i=0;i<=TILE_COUNT;i++) {
             ctx.beginPath(); ctx.moveTo(i*GRID_SIZE,0); ctx.lineTo(i*GRID_SIZE,canvas.height); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(0,i*GRID_SIZE); ctx.lineTo(canvas.width,i*GRID_SIZE); ctx.stroke();
         }
-
         const fx=food.x*GRID_SIZE, fy=food.y*GRID_SIZE;
         ctx.shadowColor=C.foodGlow; ctx.shadowBlur=12;
         ctx.fillStyle=C.food;
-        ctx.beginPath();
-        ctx.arc(fx+GRID_SIZE/2, fy+GRID_SIZE/2, GRID_SIZE/2-1, 0, Math.PI*2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(fx+GRID_SIZE/2, fy+GRID_SIZE/2, GRID_SIZE/2-1, 0, Math.PI*2); ctx.fill();
         ctx.shadowBlur=0;
-
         snake.forEach((seg,i) => {
             const x=seg.x*GRID_SIZE, y=seg.y*GRID_SIZE, isHead=i===0;
             if (isHead) { ctx.shadowColor=C.head; ctx.shadowBlur=8; }
@@ -605,7 +795,6 @@
                 ctx.fillRect(e1x,e1y,es,es); ctx.fillRect(e2x,e2y,es,es);
             }
         });
-
         particles = particles.filter(p=>p.life>0);
         particles.forEach(p => {
             ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
@@ -613,7 +802,6 @@
             p.x+=p.vx; p.y+=p.vy; p.life-=0.05;
         });
         ctx.globalAlpha=1;
-
         if (isPaused && !menuOpen) {
             ctx.fillStyle='rgba(0,0,0,0.5)';
             ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -628,81 +816,60 @@
     function startGame() {
         if (gameLoop) clearInterval(gameLoop);
         initGame(); isRunning=true; isPaused=false; menuOpen=false;
-        overlay.classList.add('hidden');
         menuBackdrop.classList.add('hidden');
         gameLoop = setInterval(() => { update(); draw(); }, gameSpeed);
     }
 
     function gameOver() {
         isRunning=false; clearInterval(gameLoop);
-        if (score>highScore) {
-            highScore=score;
-            localStorage.setItem('snakeHighScore',highScore);
-            highScoreEl.textContent=highScore;
+        const isNewBest = score > highScore;
+        if (isNewBest) {
+            highScore = score;
+            localStorage.setItem('snakeHighScore', highScore);
+            highScoreEl.textContent = highScore;
         }
-        overlayHighScore.textContent=`High Score: ${highScore} | ${DIFFICULTIES[currentDifficulty].label}`;
-        overlay.querySelector('h2').textContent='GAME OVER';
-        overlay.querySelector('p').textContent=`Final Score: ${score}`;
-        overlay.querySelector('.btn').textContent='PLAY AGAIN';
-        overlay.classList.remove('hidden');
+        totalGames++;
+        lastScore = score;
+        localStorage.setItem('snakeTotalGames', totalGames);
+        localStorage.setItem('snakeLastScore', lastScore);
         menuBackdrop.classList.add('hidden');
         menuOpen = false;
+
+        // Show game over screen
+        document.getElementById('goScore').textContent = score;
+        document.getElementById('goBest').textContent  = highScore;
+        document.getElementById('goDiffBadge').textContent = DIFFICULTIES[currentDifficulty].label;
+        const nb = document.getElementById('goNewBest');
+        nb.classList.toggle('show', isNewBest);
+        gameOverScreen.classList.remove('hidden');
     }
 
     function togglePause() {
         if (!isRunning || menuOpen) return;
-        isPaused = !isPaused;
-        draw();
+        isPaused = !isPaused; draw();
     }
 
-    /* ── Menu popup logic ────────────────────────────────────── */
+    /* ── Menu popup ──────────────────────────────────────────── */
     function openMenu() {
-        if (!isRunning) return; // don't open menu on home/game-over screen
-        // Pause the game when menu opens
+        if (!isRunning) return;
         if (!isPaused) { isPaused = true; draw(); }
         menuOpen = true;
         menuBackdrop.classList.remove('hidden');
     }
 
-    function closeMenu() {
-        menuBackdrop.classList.add('hidden');
-        menuOpen = false;
-    }
+    function closeMenu() { menuBackdrop.classList.add('hidden'); menuOpen = false; }
 
-    function menuResume() {
-        closeMenu();
-        isPaused = false;
-        draw();
-    }
+    function menuResume()  { closeMenu(); isPaused = false; draw(); }
+    function menuRestart() { closeMenu(); startGame(); }
+    function menuHome()    { closeMenu(); if (gameLoop) clearInterval(gameLoop); isRunning=false; isPaused=false; showHome(); }
 
-    function menuRestart() {
-        closeMenu();
-        startGame();
-    }
-
-    function menuHome() {
-        closeMenu();
-        // Stop the game and show home screen
-        if (gameLoop) clearInterval(gameLoop);
-        isRunning = false; isPaused = false;
-        overlayHighScore.textContent = highScore ? `High Score: ${highScore}` : '';
-        overlay.querySelector('h2').textContent = 'SNAKE GAME';
-        overlay.querySelector('p').textContent  = 'Arrow Keys / WASD or D-pad';
-        overlay.querySelector('.btn').textContent = 'PLAY';
-        overlay.classList.remove('hidden');
-    }
-
-    // Close menu if backdrop clicked outside the popup
-    menuBackdrop.addEventListener('click', function(e) {
-        if (e.target === menuBackdrop) menuResume();
-    });
+    menuBackdrop.addEventListener('click', e => { if (e.target === menuBackdrop) menuResume(); });
 
     /* ── Keyboard ────────────────────────────────────────────── */
     document.addEventListener('keydown', e => {
-        if (!isRunning && e.key===' ') { startGame(); return; }
         if (e.key==='m'||e.key==='M') { e.preventDefault(); if (isRunning) { menuOpen ? menuResume() : openMenu(); } return; }
         if (e.key==='Escape') { e.preventDefault(); if (menuOpen) { menuResume(); } else { togglePause(); } return; }
-        if (e.key===' ') { e.preventDefault(); togglePause(); return; }
+        if (e.key===' ') { e.preventDefault(); if (!isRunning) return; togglePause(); return; }
         if (!isRunning||isPaused||menuOpen) return;
         const k=e.key.toLowerCase();
         if ((k==='arrowup'   ||k==='w')&&direction.y!==1)  nextDirection={x:0,y:-1};
@@ -715,9 +882,9 @@
     function dpadPress(e, dir) {
         e.preventDefault();
         document.getElementById('btn-'+dir)?.classList.add('pressed');
-        if (!isRunning) { startGame(); return; }
-        if (menuOpen)   { return; }
-        if (isPaused)   { togglePause(); return; }
+        if (!isRunning) { startGameFromDash(); return; }
+        if (menuOpen) return;
+        if (isPaused) { togglePause(); return; }
         if (dir==='up'   &&direction.y!==1)  nextDirection={x:0,y:-1};
         if (dir==='down' &&direction.y!==-1) nextDirection={x:0,y:1};
         if (dir==='left' &&direction.x!==1)  nextDirection={x:-1,y:0};
