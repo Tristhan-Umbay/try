@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" type="image/x-icon" href="snake.png">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snake Game</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --safe-margin: 10px;
+            --safe-margin-tb: 18px;
+            --game-size: 300px;
+            --dpad-btn: 60px;
+        }
+
+        html, body { width: 100%; height: 100%; }
+
+        body {
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100dvh;
+            max-height: 100dvh;
+            font-family: 'Courier New', monospace;
+            color: #eee;
+            overflow: hidden;
+            padding: var(--safe-margin-tb) var(--safe-margin);
+            gap: 0;
+        }
+
+        /* ── UI Panel ─────────────────────────────── */
+        .ui-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: var(--game-size);
+            flex-shrink: 0;
+            margin-bottom: 6px;
+        }
+
+        .score-box {
+            background: #16213e;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 2px solid #e94560;
+            font-size: clamp(9px, 2vw, 14px);
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .score-box span { color: #e94560; }
+
+        .btn {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 5px 14px;
+            font-size: clamp(9px, 1.8vw, 13px);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: transform 0.1s, background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover { background: #ff6b6b; transform: scale(1.05); }
+        .btn:active { transform: scale(0.95); }
+
+        /* ── Menu Button ──────────────────────────── */
+        .menu-btn {
+            background: #16213e;
+            color: #4ecca3;
+            border: 2px solid #4ecca3;
+            padding: 5px 14px;
+            font-size: clamp(9px, 1.8vw, 13px);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: transform 0.1s, background 0.2s, color 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .menu-btn:hover { background: #4ecca3; color: #1a1a2e; transform: scale(1.05); }
+        .menu-btn:active { transform: scale(0.95); }
+
+        .menu-btn .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .menu-btn .hamburger span {
+            display: block;
+            width: 14px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 2px;
+            transition: background 0.2s;
+        }
+
+        /* ── Game Container ───────────────────────── */
+        .game-container {
+            position: relative;
+            border: 3px solid #16213e;
+            border-radius: 8px;
+            background: #0f3460;
+            padding: 5px;
+            flex-shrink: 0;
+            width: var(--game-size);
+            height: var(--game-size);
+        }
+
+        #gameCanvas {
+            display: block;
+            background: #1a1a2e;
+            border-radius: 4px;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ── Overlay (start/game-over screen) ──────── */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.87);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            z-index: 10;
+            gap: 6px;
+            padding: 12px;
+        }
+
+        .overlay h2 {
+            color: #e94560;
+            font-size: clamp(14px, 4.5vw, 28px);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .overlay p {
+            color: #aaa;
+            font-size: clamp(8px, 1.8vw, 13px);
+            text-align: center;
+        }
+
+        .diff-label {
+            color: #888;
+            font-size: clamp(7px, 1.4vw, 10px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .diff-btn {
+            padding: 3px 10px;
+            border: 2px solid #4ecca3;
+            background: transparent;
+            color: #4ecca3;
+            font-family: inherit;
+            font-size: clamp(7px, 1.6vw, 11px);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .diff-btn:hover { background: #4ecca3; color: #1a1a2e; }
+        .diff-btn.active {
+            background: #4ecca3;
+            color: #1a1a2e;
+            box-shadow: 0 0 10px rgba(78,204,163,0.4);
+        }
+
+        .high-score {
+            color: #ffd700;
+            font-size: clamp(7px, 1.6vw, 11px);
+        }
+
+        /* ── Menu Popup ───────────────────────────── */
+        .menu-popup-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.15s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+
+        .menu-popup {
+            background: #0f3460;
+            border: 2px solid #4ecca3;
+            border-radius: 14px;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            min-width: 200px;
+            box-shadow: 0 0 40px rgba(78,204,163,0.25), 0 8px 32px rgba(0,0,0,0.6);
+            animation: popIn 0.18s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        .menu-popup h3 {
+            color: #4ecca3;
+            font-size: clamp(14px, 3.5vw, 20px);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #4ecca333;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 10px;
+        }
+
+        .menu-popup-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .popup-btn {
+            width: 100%;
+            padding: 10px 0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: clamp(11px, 2.5vw, 15px);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s, background 0.2s, color 0.2s;
+            letter-spacing: 1px;
+        }
+
+        .popup-btn:active { transform: scale(0.95); }
+
+        .popup-btn.resume {
+            background: #4ecca3;
+            color: #1a1a2e;
+            border-color: #4ecca3;
+        }
+
+        .popup-btn.resume:hover { background: #6eefc0; }
+
+        .popup-btn.restart {
+            background: transparent;
+            color: #e94560;
+            border-color: #e94560;
+        }
+
+        .popup-btn.restart:hover { background: #e94560; color: #fff; }
+
+        .popup-btn.home {
+            background: transparent;
+            color: #aaa;
+            border-color: #444;
+        }
+
+        .popup-btn.home:hover { background: #16213e; color: #eee; border-color: #888; }
+
+        /* ── Desktop keyboard hint ──────────────────── */
+        .controls-info {
+            color: #666;
+            font-size: clamp(9px, 1.4vw, 12px);
+            text-align: center;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        /* ── D-pad ────────────────────────────────── */
+        .mobile-controls {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            user-select: none;
+            margin-top: 6px;
+            gap: 0;
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .mobile-controls { display: flex; }
+            .controls-info   { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .mobile-controls { display: flex; }
+            .controls-info   { display: none; }
+        }
+
+        @media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+            .mobile-controls { display: none !important; }
+            .controls-info   { display: block !important; }
+        }
+
+        .d-pad-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .d-pad-spacer {
+            width: var(--dpad-btn);
+            height: var(--dpad-btn);
+        }
+
+        .d-pad-btn {
+            width: var(--dpad-btn);
+            height: var(--dpad-btn);
+            background: #16213e;
+            border: 2px solid #4ecca3;
+            color: #4ecca3;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            transition: background 0.1s, transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+            margin: 3px;
+        }
+
+        .d-pad-btn.pause-btn {
+            border-color: #e94560;
+            color: #e94560;
+            font-size: clamp(14px, 4vw, 20px);
+            font-family: inherit;
+        }
+
+        .d-pad-btn svg {
+            width: 55%; height: 55%;
+            stroke: currentColor; fill: none;
+            stroke-width: 3;
+            stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        .d-pad-btn:active, .d-pad-btn.pressed {
+            background: #4ecca3; color: #1a1a2e; transform: scale(0.9);
+        }
+
+        .d-pad-btn.pause-btn:active { background: #e94560; color: #fff; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Score row -->
+    <div class="ui-panel">
+        <div class="score-box">SCORE: <span id="score">0</span></div>
+        <!-- MENU button (replaces START) -->
+        <button class="menu-btn" id="menuTopBtn" onclick="openMenu()">
+            <span class="hamburger">
+                <span></span><span></span><span></span>
+            </span>
+            MENU
+        </button>
+        <div class="score-box">HIGH: <span id="highScore">0</span></div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <!-- Start / Game-Over overlay -->
+        <div class="overlay" id="overlay">
+            <h2>SNAKE GAME</h2>
+            <div class="diff-label">Select Difficulty</div>
+            <div class="difficulty-selector">
+                <button class="diff-btn active" onclick="setDifficulty('easy')">EASY</button>
+                <button class="diff-btn" onclick="setDifficulty('medium')">MEDIUM</button>
+                <button class="diff-btn" onclick="setDifficulty('hard')">HARD</button>
+                <button class="diff-btn" onclick="setDifficulty('veryhard')">VERY HARD</button>
+            </div>
+            <p>Arrow Keys / WASD or D-pad</p>
+            <button class="btn" onclick="startGame()">PLAY</button>
+            <div class="high-score" id="overlayHighScore"></div>
+        </div>
+    </div>
+
+    <!-- Desktop hint -->
+    <div class="controls-info">Arrow Keys or WASD &bull; Space to pause &bull; M for menu</div>
+
+    <!-- D-pad -->
+    <div class="mobile-controls" id="dpad">
+        <div class="d-pad-row">
+            <div class="d-pad-spacer"></div>
+            <button class="d-pad-btn" id="btn-up" aria-label="Up"
+                ontouchstart="dpadPress(event,'up')" ontouchend="dpadRelease('up')"
+                onmousedown="dpadPress(event,'up')" onmouseup="dpadRelease('up')">
+                <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <div class="d-pad-spacer"></div>
+        </div>
+        <div class="d-pad-row">
+            <button class="d-pad-btn" id="btn-left" aria-label="Left"
+                ontouchstart="dpadPress(event,'left')" ontouchend="dpadRelease('left')"
+                onmousedown="dpadPress(event,'left')" onmouseup="dpadRelease('left')">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <!-- Centre D-pad: blank spacer -->
+            <div class="d-pad-spacer"></div>
+            <button class="d-pad-btn" id="btn-right" aria-label="Right"
+                ontouchstart="dpadPress(event,'right')" ontouchend="dpadRelease('right')"
+                onmousedown="dpadPress(event,'right')" onmouseup="dpadRelease('right')">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+        <div class="d-pad-row">
+            <div class="d-pad-spacer"></div>
+            <button class="d-pad-btn" id="btn-down" aria-label="Down"
+                ontouchstart="dpadPress(event,'down')" ontouchend="dpadRelease('down')"
+                onmousedown="dpadPress(event,'down')" onmouseup="dpadRelease('down')">
+                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="d-pad-spacer"></div>
+        </div>
+    </div>
+
+    <!-- Menu Popup -->
+    <div class="menu-popup-backdrop hidden" id="menuBackdrop">
+        <div class="menu-popup">
+            <h3>⚙ Menu</h3>
+            <div class="menu-popup-actions">
+                <button class="popup-btn resume"  onclick="menuResume()">▶ Resume</button>
+                <button class="popup-btn restart" onclick="menuRestart()">↺ Restart</button>
+                <button class="popup-btn home"    onclick="menuHome()">⌂ Home</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const canvas   = document.getElementById('gameCanvas');
+    const ctx      = canvas.getContext('2d');
+    const overlay  = document.getElementById('overlay');
+    const scoreEl  = document.getElementById('score');
+    const highScoreEl      = document.getElementById('highScore');
+    const overlayHighScore = document.getElementById('overlayHighScore');
+    const dpadEl   = document.getElementById('dpad');
+    const menuBackdrop = document.getElementById('menuBackdrop');
+
+    const TILE_COUNT = 24;
+    let GRID_SIZE = 12;
+
+    const DIFFICULTIES = {
+        easy:     { speed: 150, label: 'EASY' },
+        medium:   { speed: 100, label: 'MEDIUM' },
+        hard:     { speed: 70,  label: 'HARD' },
+        veryhard: { speed: 40,  label: 'VERY HARD' }
+    };
+
+    let currentDifficulty = 'easy';
+    let gameSpeed = 150;
+    let snake=[], food={}, direction={x:0,y:0}, nextDirection={x:0,y:0};
+    let score=0, highScore=+(localStorage.getItem('snakeHighScore')||0);
+    let gameLoop=null, isRunning=false, isPaused=false, particles=[];
+    let menuOpen = false;
+
+    const C = {
+        bg:'#1a1a2e', grid:'#16213e',
+        head:'#4ecca3', body:'#3cb371', outline:'#2e8b57',
+        food:'#e94560', foodGlow:'#ff6b6b'
+    };
+
+    highScoreEl.textContent = highScore;
+
+    /* ── Responsive sizing ───────────────────────────────────── */
+    function isDpadVisible() {
+        return window.getComputedStyle(dpadEl).display !== 'none';
+    }
+
+    function resize() {
+        const margin   = 10;
+        const marginTB = 18;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const uiH     = 42;
+        const hintH   = isDpadVisible() ? 0 : 24;
+        const dpadVisible = isDpadVisible();
+        const dpadEstimate = dpadVisible ? 210 : 0;
+        const gap = 20;
+        const availH = vh - marginTB * 2 - uiH - hintH - dpadEstimate - gap;
+        const availW = vw - margin * 2;
+        const raw  = Math.min(availW, availH);
+        const size = Math.max(96, Math.floor(raw / TILE_COUNT) * TILE_COUNT);
+        GRID_SIZE  = size / TILE_COUNT;
+        document.documentElement.style.setProperty('--game-size', size + 'px');
+        canvas.width  = size;
+        canvas.height = size;
+        const btnRaw  = Math.floor((size - margin * 2) / 3);
+        const btnSize = Math.min(Math.max(btnRaw, 44), 80);
+        document.documentElement.style.setProperty('--dpad-btn', btnSize + 'px');
+        draw();
+    }
+
+    window.addEventListener('resize', () => { resize(); });
+    requestAnimationFrame(() => requestAnimationFrame(resize));
+
+    /* ── Difficulty ──────────────────────────────────────────── */
+    function setDifficulty(diff) {
+        currentDifficulty = diff;
+        gameSpeed = DIFFICULTIES[diff].speed;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[onclick="setDifficulty('${diff}')"]`).classList.add('active');
+    }
+
+    /* ── Game logic ──────────────────────────────────────────── */
+    function initGame() {
+        const s = Math.floor(TILE_COUNT / 2);
+        snake = [{x:s,y:s},{x:s-1,y:s},{x:s-2,y:s}];
+        direction = {x:1,y:0}; nextDirection = {x:1,y:0};
+        score = 0; scoreEl.textContent = 0;
+        particles = [];
+        spawnFood();
+    }
+
+    function spawnFood() {
+        let ok = false;
+        while (!ok) {
+            food = { x:Math.floor(Math.random()*TILE_COUNT), y:Math.floor(Math.random()*TILE_COUNT) };
+            ok = !snake.some(s => s.x===food.x && s.y===food.y);
+        }
+    }
+
+    function update() {
+        if (isPaused || menuOpen) return;
+        direction = {...nextDirection};
+        const head = { x:snake[0].x+direction.x, y:snake[0].y+direction.y };
+        if (head.x<0||head.x>=TILE_COUNT||head.y<0||head.y>=TILE_COUNT) { gameOver(); return; }
+        if (snake.some(s => s.x===head.x&&s.y===head.y))                { gameOver(); return; }
+        snake.unshift(head);
+        if (head.x===food.x && head.y===food.y) {
+            score += 10; scoreEl.textContent = score;
+            for (let i=0;i<8;i++) particles.push({
+                x:food.x*GRID_SIZE+GRID_SIZE/2, y:food.y*GRID_SIZE+GRID_SIZE/2,
+                vx:(Math.random()-.5)*4, vy:(Math.random()-.5)*4, life:1, color:C.food
+            });
+            spawnFood();
+        } else { snake.pop(); }
+    }
+
+    function draw() {
+        ctx.fillStyle = C.bg;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 0.5;
+        for (let i=0;i<=TILE_COUNT;i++) {
+            ctx.beginPath(); ctx.moveTo(i*GRID_SIZE,0); ctx.lineTo(i*GRID_SIZE,canvas.height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0,i*GRID_SIZE); ctx.lineTo(canvas.width,i*GRID_SIZE); ctx.stroke();
+        }
+
+        const fx=food.x*GRID_SIZE, fy=food.y*GRID_SIZE;
+        ctx.shadowColor=C.foodGlow; ctx.shadowBlur=12;
+        ctx.fillStyle=C.food;
+        ctx.beginPath();
+        ctx.arc(fx+GRID_SIZE/2, fy+GRID_SIZE/2, GRID_SIZE/2-1, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur=0;
+
+        snake.forEach((seg,i) => {
+            const x=seg.x*GRID_SIZE, y=seg.y*GRID_SIZE, isHead=i===0;
+            if (isHead) { ctx.shadowColor=C.head; ctx.shadowBlur=8; }
+            ctx.fillStyle = isHead ? C.head : C.body;
+            const p = isHead ? 1 : 2;
+            ctx.fillRect(x+p, y+p, GRID_SIZE-p*2, GRID_SIZE-p*2);
+            ctx.shadowBlur=0;
+            ctx.strokeStyle=C.outline; ctx.lineWidth=1;
+            ctx.strokeRect(x+p, y+p, GRID_SIZE-p*2, GRID_SIZE-p*2);
+            if (isHead) {
+                ctx.fillStyle='#1a1a2e';
+                const es=Math.max(2,GRID_SIZE*.16);
+                let e1x,e1y,e2x,e2y;
+                if      (direction.x===1)  {e1x=x+GRID_SIZE*.64;e1y=y+GRID_SIZE*.24;e2x=x+GRID_SIZE*.64;e2y=y+GRID_SIZE*.60;}
+                else if (direction.x===-1) {e1x=x+GRID_SIZE*.20;e1y=y+GRID_SIZE*.24;e2x=x+GRID_SIZE*.20;e2y=y+GRID_SIZE*.60;}
+                else if (direction.y===-1) {e1x=x+GRID_SIZE*.24;e1y=y+GRID_SIZE*.20;e2x=x+GRID_SIZE*.60;e2y=y+GRID_SIZE*.20;}
+                else                       {e1x=x+GRID_SIZE*.24;e1y=y+GRID_SIZE*.64;e2x=x+GRID_SIZE*.60;e2y=y+GRID_SIZE*.64;}
+                ctx.fillRect(e1x,e1y,es,es); ctx.fillRect(e2x,e2y,es,es);
+            }
+        });
+
+        particles = particles.filter(p=>p.life>0);
+        particles.forEach(p => {
+            ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+            ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+            p.x+=p.vx; p.y+=p.vy; p.life-=0.05;
+        });
+        ctx.globalAlpha=1;
+
+        if (isPaused && !menuOpen) {
+            ctx.fillStyle='rgba(0,0,0,0.5)';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle='#fff';
+            ctx.font=`bold ${Math.max(16,GRID_SIZE*1.4)}px Courier New`;
+            ctx.textAlign='center';
+            ctx.fillText('PAUSED', canvas.width/2, canvas.height/2);
+            ctx.textAlign='left';
+        }
+    }
+
+    function startGame() {
+        if (gameLoop) clearInterval(gameLoop);
+        initGame(); isRunning=true; isPaused=false; menuOpen=false;
+        overlay.classList.add('hidden');
+        menuBackdrop.classList.add('hidden');
+        gameLoop = setInterval(() => { update(); draw(); }, gameSpeed);
+    }
+
+    function gameOver() {
+        isRunning=false; clearInterval(gameLoop);
+        if (score>highScore) {
+            highScore=score;
+            localStorage.setItem('snakeHighScore',highScore);
+            highScoreEl.textContent=highScore;
+        }
+        overlayHighScore.textContent=`High Score: ${highScore} | ${DIFFICULTIES[currentDifficulty].label}`;
+        overlay.querySelector('h2').textContent='GAME OVER';
+        overlay.querySelector('p').textContent=`Final Score: ${score}`;
+        overlay.querySelector('.btn').textContent='PLAY AGAIN';
+        overlay.classList.remove('hidden');
+        menuBackdrop.classList.add('hidden');
+        menuOpen = false;
+    }
+
+    function togglePause() {
+        if (!isRunning || menuOpen) return;
+        isPaused = !isPaused;
+        draw();
+    }
+
+    /* ── Menu popup logic ────────────────────────────────────── */
+    function openMenu() {
+        if (!isRunning) return; // don't open menu on home/game-over screen
+        // Pause the game when menu opens
+        if (!isPaused) { isPaused = true; draw(); }
+        menuOpen = true;
+        menuBackdrop.classList.remove('hidden');
+    }
+
+    function closeMenu() {
+        menuBackdrop.classList.add('hidden');
+        menuOpen = false;
+    }
+
+    function menuResume() {
+        closeMenu();
+        isPaused = false;
+        draw();
+    }
+
+    function menuRestart() {
+        closeMenu();
+        startGame();
+    }
+
+    function menuHome() {
+        closeMenu();
+        // Stop the game and show home screen
+        if (gameLoop) clearInterval(gameLoop);
+        isRunning = false; isPaused = false;
+        overlayHighScore.textContent = highScore ? `High Score: ${highScore}` : '';
+        overlay.querySelector('h2').textContent = 'SNAKE GAME';
+        overlay.querySelector('p').textContent  = 'Arrow Keys / WASD or D-pad';
+        overlay.querySelector('.btn').textContent = 'PLAY';
+        overlay.classList.remove('hidden');
+    }
+
+    // Close menu if backdrop clicked outside the popup
+    menuBackdrop.addEventListener('click', function(e) {
+        if (e.target === menuBackdrop) menuResume();
+    });
+
+    /* ── Keyboard ────────────────────────────────────────────── */
+    document.addEventListener('keydown', e => {
+        if (!isRunning && e.key===' ') { startGame(); return; }
+        if (e.key==='m'||e.key==='M') { e.preventDefault(); if (isRunning) { menuOpen ? menuResume() : openMenu(); } return; }
+        if (e.key==='Escape') { e.preventDefault(); if (menuOpen) { menuResume(); } else { togglePause(); } return; }
+        if (e.key===' ') { e.preventDefault(); togglePause(); return; }
+        if (!isRunning||isPaused||menuOpen) return;
+        const k=e.key.toLowerCase();
+        if ((k==='arrowup'   ||k==='w')&&direction.y!==1)  nextDirection={x:0,y:-1};
+        if ((k==='arrowdown' ||k==='s')&&direction.y!==-1) nextDirection={x:0,y:1};
+        if ((k==='arrowleft' ||k==='a')&&direction.x!==1)  nextDirection={x:-1,y:0};
+        if ((k==='arrowright'||k==='d')&&direction.x!==-1) nextDirection={x:1,y:0};
+    });
+
+    /* ── D-pad ───────────────────────────────────────────────── */
+    function dpadPress(e, dir) {
+        e.preventDefault();
+        document.getElementById('btn-'+dir)?.classList.add('pressed');
+        if (!isRunning) { startGame(); return; }
+        if (menuOpen)   { return; }
+        if (isPaused)   { togglePause(); return; }
+        if (dir==='up'   &&direction.y!==1)  nextDirection={x:0,y:-1};
+        if (dir==='down' &&direction.y!==-1) nextDirection={x:0,y:1};
+        if (dir==='left' &&direction.x!==1)  nextDirection={x:-1,y:0};
+        if (dir==='right'&&direction.x!==-1) nextDirection={x:1,y:0};
+    }
+
+    function dpadRelease(dir) {
+        document.getElementById('btn-'+dir)?.classList.remove('pressed');
+    }
+</script>
+</body>
+</html>
